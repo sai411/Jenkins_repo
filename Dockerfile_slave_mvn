@@ -1,0 +1,20 @@
+FROM ubuntu:latest
+
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get autoremove -y
+ARG PASSWORD
+RUN apt-get install -y openjdk-11-jdk maven openssh-server git
+
+RUN mkdir /var/run/sshd
+
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+RUN useradd -ms /bin/bash jenkins
+
+RUN echo 'jenkins:'${PASSWORD} | chpasswd && \
+    passwd --lock jenkins
+
+CMD ["/usr/sbin/sshd", "-D"]
+# run this as 
+#docker build -f Dockerfile -t <img_name> --build-arg PASSWORD="enter password"
